@@ -1,0 +1,415 @@
+{
+  "events": [
+    {
+      "id": "8cfd0975-56b9-4362-87c7-7f2d486a41a1",
+      "title": "ReactConf 2026",
+      "category": "Technology",
+      "date": "2026-11-15",
+      "time": "09:00",
+      "venue": "Jio World Convention Centre",
+      "city": "Mumbai",
+      "price": 2999,
+      "capacity": 500,
+      "registered": 342,
+      "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
+      "description": "The premier React conference with talks from the core team and leading practitioners.",
+      "schedule": [
+        {
+          "time": "09:00",
+          "title": "Registration & Breakfast"
+        },
+        {
+          "time": "10:00",
+          "title": "Keynote: React 2026"
+        },
+        {
+          "time": "11:30",
+          "title": "Workshop: Server Components"
+        },
+        {
+          "time": "14:00",
+          "title": "Talk: Performance Patterns"
+        }
+      ]
+    },
+    {
+      "id": "a8c67828-2ce7-4f49-b8ca-8a557ee02b38",
+      "title": "AI Summit India",
+      "category": "Technology",
+      "date": "2026-11-22",
+      "time": "10:00",
+      "venue": "Bharat Mandapam",
+      "city": "New Delhi",
+      "price": 4999,
+      "capacity": 1000,
+      "registered": 876,
+      "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800",
+      "description": "Explore the frontier of artificial intelligence with leading researchers and builders.",
+      "schedule": [
+        {
+          "time": "10:00",
+          "title": "Opening Keynote"
+        },
+        {
+          "time": "11:30",
+          "title": "LLM Panel"
+        },
+        {
+          "time": "13:00",
+          "title": "Lunch Break"
+        },
+        {
+          "time": "14:30",
+          "title": "Hands-on AI Workshop"
+        }
+      ]
+    },
+    {
+      "id": "a9c96c33-f989-4a42-b67e-e1ce6c80b727",
+      "title": "Jazz Nights Festival",
+      "category": "Music",
+      "date": "2026-12-05",
+      "time": "19:00",
+      "venue": "Mehboob Studios",
+      "city": "Mumbai",
+      "price": 799,
+      "capacity": 300,
+      "registered": 210,
+      "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800",
+      "description": "A magical evening of live jazz under the stars with world-class musicians.",
+      "schedule": [
+        {
+          "time": "19:00",
+          "title": "Doors Open"
+        },
+        {
+          "time": "20:00",
+          "title": "Opening Act"
+        },
+        {
+          "time": "21:00",
+          "title": "Main Performance"
+        },
+        {
+          "time": "23:00",
+          "title": "Encore & Close"
+        }
+      ]
+    },
+    {
+      "id": "707a5493-c52e-4ace-86cc-6a591060a5b7",
+      "title": "EDM Block Party",
+      "category": "Music",
+      "date": "2026-12-12",
+      "time": "20:00",
+      "venue": "MMRDA Grounds, BKC",
+      "city": "Mumbai",
+      "price": 599,
+      "capacity": 2000,
+      "registered": 1543,
+      "image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800",
+      "description": "Three stages, twelve DJs, one massive night of electronic music.",
+      "schedule": [
+        {
+          "time": "20:00",
+          "title": "Gates Open"
+        },
+        {
+          "time": "21:00",
+          "title": "Opening DJs"
+        },
+        {
+          "time": "23:00",
+          "title": "Headliner Set"
+        },
+        {
+          "time": "02:00",
+          "title": "After Party"
+        }
+      ]
+    },
+    {
+      "id": "3a5adbac-656f-441f-8a31-d0d789c26b32",
+      "title": "Food & Flavours Expo",
+      "category": "Food",
+      "date": "2026-11-28",
+      "time": "12:00",
+      "venue": "Palace Grounds",
+      "city": "Bengaluru",
+      "price": 999,
+      "capacity": 800,
+      "registered": 654,
+      "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800",
+      "description": "Savor culinary masterpieces from 50+ chefs across India paired with craft beverages.",
+      "schedule": [
+        {
+          "time": "12:00",
+          "title": "Expo Opens"
+        },
+        {
+          "time": "13:00",
+          "title": "Chef Demos"
+        },
+        {
+          "time": "15:00",
+          "title": "Tasting Sessions"
+        },
+        {
+          "time": "17:00",
+          "title": "Awards Ceremony"
+        }
+      ]
+    },
+    {
+      "id": "a98aa32d-2686-412d-8d59-de7b5347ee2e",
+      "title": "Street Food Carnival",
+      "category": "Food",
+      "date": "2026-12-20",
+      "time": "11:00",
+      "venue": "Lal Qila Maidan",
+      "city": "New Delhi",
+      "price": 199,
+      "capacity": 5000,
+      "registered": 3200,
+      "image": "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=800",
+      "description": "Over 100 vendors serving iconic Indian street food in a festive outdoor setting.",
+      "schedule": [
+        {
+          "time": "11:00",
+          "title": "Opening"
+        },
+        {
+          "time": "12:00",
+          "title": "Cook-off Competition"
+        },
+        {
+          "time": "15:00",
+          "title": "Live Music"
+        },
+        {
+          "time": "18:00",
+          "title": "Closing"
+        }
+      ]
+    },
+    {
+      "id": "8b301396-7100-4791-a084-1e5fbd8bd83b",
+      "title": "Mumbai Marathon 2026",
+      "category": "Sports",
+      "date": "2026-11-30",
+      "time": "06:00",
+      "venue": "Azad Maidan",
+      "city": "Mumbai",
+      "price": 850,
+      "capacity": 10000,
+      "registered": 8920,
+      "image": "https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800",
+      "description": "The annual city marathon through iconic historic routes. All paces welcome.",
+      "schedule": [
+        {
+          "time": "06:00",
+          "title": "Registration & Warmup"
+        },
+        {
+          "time": "07:00",
+          "title": "Race Start"
+        },
+        {
+          "time": "09:00",
+          "title": "First Finishers"
+        },
+        {
+          "time": "12:00",
+          "title": "Awards Ceremony"
+        }
+      ]
+    },
+    {
+      "id": "82e719e9-f781-4cdd-9efd-b10ba6bc9193",
+      "title": "Yoga Retreat Weekend",
+      "category": "Sports",
+      "date": "2026-12-07",
+      "time": "07:00",
+      "venue": "Ananda Spa Resort",
+      "city": "Rishikesh",
+      "price": 3500,
+      "capacity": 100,
+      "registered": 67,
+      "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800",
+      "description": "A transformative weekend of yoga, meditation and wellness in the foothills of the Himalayas.",
+      "schedule": [
+        {
+          "time": "07:00",
+          "title": "Morning Flow"
+        },
+        {
+          "time": "09:00",
+          "title": "Breakfast"
+        },
+        {
+          "time": "10:30",
+          "title": "Workshop: Pranayama"
+        },
+        {
+          "time": "15:00",
+          "title": "Sunset Meditation"
+        }
+      ]
+    },
+    {
+      "id": "d51a71d7-0d6d-4a8c-8700-d1db0c6934fe",
+      "title": "Modern Art Fair",
+      "category": "Art",
+      "date": "2026-12-01",
+      "time": "10:00",
+      "venue": "National Gallery of Modern Art",
+      "city": "New Delhi",
+      "price": 450,
+      "capacity": 600,
+      "registered": 389,
+      "image": "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800",
+      "description": "Discover emerging and established Indian artists in an immersive gallery experience.",
+      "schedule": [
+        {
+          "time": "10:00",
+          "title": "Doors Open"
+        },
+        {
+          "time": "11:00",
+          "title": "Artist Talks"
+        },
+        {
+          "time": "14:00",
+          "title": "Curator Tour"
+        },
+        {
+          "time": "17:00",
+          "title": "Evening Reception"
+        }
+      ]
+    },
+    {
+      "id": "4345639e-aff6-4365-a5a7-20ecd159c002",
+      "title": "Photography Workshop",
+      "category": "Art",
+      "date": "2026-12-14",
+      "time": "09:00",
+      "venue": "Dhobi Ghat Studios",
+      "city": "Mumbai",
+      "price": 1800,
+      "capacity": 30,
+      "registered": 28,
+      "image": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800",
+      "description": "Hands-on workshop covering composition, lighting and post-processing with pros.",
+      "schedule": [
+        {
+          "time": "09:00",
+          "title": "Introduction"
+        },
+        {
+          "time": "10:00",
+          "title": "Studio Session"
+        },
+        {
+          "time": "13:00",
+          "title": "Field Shoot"
+        },
+        {
+          "time": "16:00",
+          "title": "Editing Masterclass"
+        }
+      ]
+    },
+    {
+      "id": "09925ec2-6b64-4f54-a903-9c207c5e44bd",
+      "title": "Startup Pitch Night",
+      "category": "Business",
+      "date": "2026-11-18",
+      "time": "18:00",
+      "venue": "NASSCOM 10000 Startups Hub",
+      "city": "Bengaluru",
+      "price": 0,
+      "capacity": 200,
+      "registered": 185,
+      "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800",
+      "description": "Watch 10 startups compete for ₹1 Crore in funding before a panel of top VCs.",
+      "schedule": [
+        {
+          "time": "18:00",
+          "title": "Networking"
+        },
+        {
+          "time": "19:00",
+          "title": "Pitches Begin"
+        },
+        {
+          "time": "21:00",
+          "title": "Judging"
+        },
+        {
+          "time": "22:00",
+          "title": "Winner Announced"
+        }
+      ]
+    },
+    {
+      "id": "159aa57d-c638-46f7-bc89-ceee901bee37",
+      "title": "Digital Marketing Summit",
+      "category": "Business",
+      "date": "2026-12-09",
+      "time": "09:00",
+      "venue": "Hyderabad International Convention Centre",
+      "city": "Hyderabad",
+      "price": 1999,
+      "capacity": 400,
+      "registered": 267,
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      "description": "Master SEO, social media, and growth hacking from India's top industry leaders.",
+      "schedule": [
+        {
+          "time": "09:00",
+          "title": "Keynote"
+        },
+        {
+          "time": "10:30",
+          "title": "SEO Deep Dive"
+        },
+        {
+          "time": "13:00",
+          "title": "Lunch"
+        },
+        {
+          "time": "14:00",
+          "title": "Growth Hacking Panel"
+        }
+      ]
+    },
+    {
+      "id": "8e402b7d-d87e-4cef-a2b0-271abee1cc0f",
+      "title": "tcet tech fest",
+      "category": "Technology",
+      "date": "2026-10-19",
+      "time": "09:00",
+      "venue": "tcet hall",
+      "city": "mumbai",
+      "price": 100,
+      "capacity": 100,
+      "registered": 1,
+      "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
+      "description": "great tech fest for college student and working professional and also fun game ",
+      "schedule": []
+    }
+  ],
+  "registrations": [
+    {
+      "id": "865296d2-1835-49cc-be01-8c37a0a25de5",
+      "eventId": "8e402b7d-d87e-4cef-a2b0-271abee1cc0f",
+      "eventTitle": "tcet tech fest",
+      "name": "zahid ",
+      "email": "zkk6944@gmail.com",
+      "phone": "888797124",
+      "tickets": 1,
+      "registeredAt": "2026-10-18T13:09:00.330Z"
+    }
+  ]
+}
