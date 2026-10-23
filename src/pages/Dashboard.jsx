@@ -16,38 +16,63 @@ export default function Dashboard() {
   const [tab, setTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const fetchDashboardData = () => {
+    Promise.allSettled([getEvents(), getRegistrations()])
+      .then(([eventsRes, regRes]) => {
+        const e = eventsRes.status === 'fulfilled' && Array.isArray(eventsRes.value) ? eventsRes.value : [];
+        const r = regRes.status === 'fulfilled' && Array.isArray(regRes.value) ? regRes.value : [];
+        setEvents(e);
+        setRegistrations(r);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    Promise.all([getEvents(), getRegistrations()]).then(([e, r]) => { setEvents(e); setRegistrations(r); setLoading(false); });
+    fetchDashboardData();
   }, []);
 
-  const totalRegistrations = events.reduce((a, e) => a + e.registered, 0);
-  const totalRevenue = registrations.reduce((a, r) => {
-    const ev = events.find(e => e.id === r.eventId);
-    return a + (ev ? ev.price * r.tickets : 0);
+  const safeEvents = Array.isArray(events) ? events : [];
+  const safeRegistrations = Array.isArray(registrations) ? registrations : [];
+
+  const totalRegistrations = safeEvents.reduce((a, e) => a + (Number(e.registered) || 0), 0);
+  const totalRevenue = safeRegistrations.reduce((a, r) => {
+    const ev = safeEvents.find(e => e.id === r.eventId);
+    return a + (ev ? (Number(ev.price) || 0) * (Number(r.tickets) || 1) : 0);
   }, 0);
 
-  const categoryData = events.reduce((acc, e) => {
+  const categoryData = safeEvents.reduce((acc, e) => {
+    if (!e || !e.category) return acc;
     const existing = acc.find(a => a.name === e.category);
     if (existing) existing.value++;
     else acc.push({ name: e.category, value: 1 });
     return acc;
   }, []);
 
-  const regByEvent = events.map(e => ({ name: e.title.slice(0, 16) + '…', registrations: e.registered, capacity: e.capacity })).sort((a, b) => b.registrations - a.registrations).slice(0, 6);
+  const regByEvent = safeEvents
+    .map(e => ({
+      name: (e.title || '').slice(0, 16) + '…',
+      registrations: Number(e.registered) || 0,
+      capacity: Number(e.capacity) || 100
+    }))
+    .sort((a, b) => b.registrations - a.registrations)
+    .slice(0, 6);
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this event?')) return;
     try {
       await deleteEvent(id);
-      setEvents(ev => ev.filter(e => e.id !== id));
-      setRegistrations(r => r.filter(reg => reg.eventId !== id));
+      setEvents(ev => (Array.isArray(ev) ? ev : []).filter(e => e.id !== id));
+      setRegistrations(r => (Array.isArray(r) ? r : []).filter(reg => reg.eventId !== id));
       toast.success('Event deleted');
     } catch { toast.error('Failed to delete'); }
   };
 
   const exportCSV = () => {
     const rows = [['Event', 'Name', 'Email', 'Phone', 'Tickets', 'Date']];
-    registrations.forEach(r => rows.push([r.eventTitle, r.name, r.email, r.phone, r.tickets, r.registeredAt?.slice(0, 10)]));
+    safeRegistrations.forEach(r => rows.push([r.eventTitle || '', r.name || '', r.email || '', r.phone || '', r.tickets || 1, (r.registeredAt || '').slice(0, 10)]));
     const csv = rows.map(r => r.join(',')).join('\n');
     const a = document.createElement('a');
     a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
@@ -57,7 +82,7 @@ export default function Dashboard() {
   };
 
   const STATS = [
-    { label: 'Total Events', value: events.length, icon: <Calendar size={20} />, color: 'from-indigo-500 to-violet-500' },
+    { label: 'Total Events', value: safeEvents.length, icon: <Calendar size={20} />, color: 'from-indigo-500 to-violet-500' },
     { label: 'Registrations', value: totalRegistrations.toLocaleString(), icon: <Users size={20} />, color: 'from-blue-500 to-cyan-500' },
     { label: 'Revenue', value: `$${totalRevenue.toLocaleString()}`, icon: <TrendingUp size={20} />, color: 'from-emerald-500 to-teal-500' },
     { label: 'Categories', value: categoryData.length, icon: <LayoutDashboard size={20} />, color: 'from-orange-500 to-amber-500' },
@@ -178,7 +203,7 @@ export default function Dashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {events.map(e => (
+                        {safeEvents.map(e => (
                           <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
@@ -216,12 +241,12 @@ export default function Dashboard() {
             {tab === 'attendees' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg">Attendees ({registrations.length})</h3>
+                  <h3 className="font-bold text-lg">Attendees ({safeRegistrations.length})</h3>
                   <button onClick={exportCSV} className="flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <Download size={16} className="text-indigo-500" /> Export CSV
                   </button>
                 </div>
-                {registrations.length === 0 ? (
+                {safeRegistrations.length === 0 ? (
                   <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <div className="text-5xl mb-3">👥</div>
                     <p className="font-semibold">No registrations yet</p>
@@ -239,7 +264,7 @@ export default function Dashboard() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                          {registrations.map(r => (
+                          {safeRegistrations.map(r => (
                             <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                               <td className="px-4 py-3 font-medium">{r.name}</td>
                               <td className="px-4 py-3 text-gray-500">{r.email}</td>

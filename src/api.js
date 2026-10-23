@@ -5,6 +5,18 @@ const baseURL = rawBaseURL.replace(/\/+$/, '');
 
 const api = axios.create({ baseURL });
 
+api.interceptors.response.use(
+  (response) => {
+    if (typeof response.data === 'string' && (response.data.trim().startsWith('<!DOCTYPE') || response.data.trim().startsWith('<html'))) {
+      return Promise.reject(new Error('API returned HTML instead of JSON. Ensure the backend is reachable.'));
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export const getEvents = (params) => api.get('/events', { params }).then(r => r.data);
 export const getEvent = (id) => api.get(`/events/${id}`).then(r => r.data);
 export const createEvent = (data) => api.post('/events', data).then(r => r.data);

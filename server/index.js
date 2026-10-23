@@ -22,10 +22,10 @@ app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     const cleanOrigin = origin.replace(/\/+$/, '');
-    if (allowedOrigins.includes(cleanOrigin)) {
+    if (allowedOrigins.includes(cleanOrigin) || process.env.VERCEL) {
       return callback(null, true);
     }
-    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    return callback(null, true);
   },
   credentials: true
 }));
@@ -46,31 +46,58 @@ const SEED = [
   { id: uuid(), title: 'Digital Marketing Summit', category: 'Business', date: '2026-12-09', time: '09:00', venue: 'Hyderabad International Convention Centre', city: 'Hyderabad', price: 1999, capacity: 400, registered: 267, image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800', description: 'Master SEO, social media, and growth hacking from India\'s top industry leaders.', schedule: [{ time: '09:00', title: 'Keynote' }, { time: '10:30', title: 'SEO Deep Dive' }, { time: '13:00', title: 'Lunch' }, { time: '14:00', title: 'Growth Hacking Panel' }] },
 ];
 
-const dbPath = join(__dirname, 'db.json');
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, JSON.stringify({ events: SEED, registrations: [] }, null, 2));
+const isVercel = Boolean(process.env.VERCEL);
+const dbPath = isVercel ? join('/tmp', 'db.json') : join(__dirname, 'db.json');
+
+try {
+  if (!fs.existsSync(dbPath)) {
+    fs.writeFileSync(dbPath, JSON.stringify({ events: SEED, registrations: [] }, null, 2));
+  }
+} catch (e) {
+  // Read-only filesystem, will use in-memory fallback
 }
 
 const adapter = new JSONFile(dbPath);
-const defaultData = { events: SEED, registrations: [] };
+const defaultData = { events: [...SEED], registrations: [] };
 const db = new Low(adapter, defaultData);
-await db.read();
 
-if (!db.data || !db.data.events || !db.data.events.length) {
-  db.data = { events: SEED, registrations: db.data?.registrations || [] };
-  await db.write();
+let inMemoryData = { events: [...SEED], registrations: [] };
+
+async function safeRead() {
+  try {
+    await db.read();
+    if (!db.data || !Array.isArray(db.data.events) || db.data.events.length === 0) {
+      db.data = { events: [...SEED], registrations: db.data?.registrations || [] };
+      await safeWrite();
+    }
+    inMemoryData = db.data;
+  } catch (err) {
+    db.data = inMemoryData;
+  }
+  return db.data || inMemoryData;
 }
+
+async function safeWrite() {
+  try {
+    await db.write();
+  } catch (err) {
+    // If filesystem is read-only (e.g. AWS Lambda/Vercel functions), keep state in-memory
+  }
+}
+
+// Initial seed read
+await safeRead();
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.get('/api/events', async (req, res) => {
-  await db.read();
-  let events = db.data.events;
+  const data = await safeRead();
+  let events = data.events || [];
   const { category, search, minPrice, maxPrice, sort } = req.query;
   if (category) events = events.filter(e => e.category === category);
-  if (search) events = events.filter(e => e.title.toLowerCase().includes(search.toLowerCase()) || e.city.toLowerCase().includes(search.toLowerCase()));
+  if (search) events = events.filter(e => (e.title || '').toLowerCase().includes(search.toLowerCase()) || (e.city || '').toLowerCase().includes(search.toLowerCase()));
   if (minPrice !== undefined) events = events.filter(e => e.price >= Number(minPrice));
   if (maxPrice !== undefined) events = events.filter(e => e.price <= Number(maxPrice));
   if (sort === 'price_asc') events = [...events].sort((a, b) => a.price - b.price);
@@ -81,62 +108,90 @@ app.get('/api/events', async (req, res) => {
 });
 
 app.get('/api/events/:id', async (req, res) => {
-  await db.read();
-  const event = db.data.events.find(e => e.id === req.params.id);
-  if (!event) return res.status(404).json({ error: 'Not found' });
+  const data = await safeRead();
+  const event = (data.events || []).find(e => e.id === req.params.id);
+  if (!event) return res.status(404).json({ error: 'Event not found' });
   res.json(event);
 });
 
 app.post('/api/events', async (req, res) => {
-  await db.read();
+  const data = await safeRead();
   const { title, category, date, time, venue, city, price, capacity, image, description, schedule } = req.body;
-  if (!title || !category || !date) return res.status(400).json({ error: 'title, category, date required' });
-  const event = { id: uuid(), title, category, date, time: time || '09:00', venue: venue || '', city: city || '', price: Number(price) || 0, capacity: Number(capacity) || 100, registered: 0, image: image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800', description: description || '', schedule: schedule || [] };
-  db.data.events.push(event);
-  await db.write();
+  if (!title || !category || !date) return res.status(400).json({ error: 'Title, category, and date are required' });
+  const event = {
+    id: uuid(),
+    title,
+    category,
+    date,
+    time: time || '09:00',
+    venue: venue || '',
+    city: city || '',
+    price: Number(price) || 0,
+    capacity: Number(capacity) || 100,
+    registered: 0,
+    image: image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
+    description: description || '',
+    schedule: Array.isArray(schedule) ? schedule : []
+  };
+  data.events.push(event);
+  await safeWrite();
   res.status(201).json(event);
 });
 
 app.put('/api/events/:id', async (req, res) => {
-  await db.read();
-  const idx = db.data.events.findIndex(e => e.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  db.data.events[idx] = { ...db.data.events[idx], ...req.body };
-  await db.write();
-  res.json(db.data.events[idx]);
+  const data = await safeRead();
+  const idx = (data.events || []).findIndex(e => e.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Event not found' });
+  data.events[idx] = { ...data.events[idx], ...req.body };
+  await safeWrite();
+  res.json(data.events[idx]);
 });
 
 app.delete('/api/events/:id', async (req, res) => {
-  await db.read();
-  const idx = db.data.events.findIndex(e => e.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  db.data.events.splice(idx, 1);
-  db.data.registrations = db.data.registrations.filter(r => r.eventId !== req.params.id);
-  await db.write();
+  const data = await safeRead();
+  const idx = (data.events || []).findIndex(e => e.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Event not found' });
+  data.events.splice(idx, 1);
+  data.registrations = (data.registrations || []).filter(r => r.eventId !== req.params.id);
+  await safeWrite();
   res.json({ ok: true });
 });
 
 app.post('/api/events/:id/register', async (req, res) => {
-  await db.read();
-  const event = db.data.events.find(e => e.id === req.params.id);
-  if (!event) return res.status(404).json({ error: 'Not found' });
+  const data = await safeRead();
+  const event = (data.events || []).find(e => e.id === req.params.id);
+  if (!event) return res.status(404).json({ error: 'Event not found' });
   const { name, email, phone, tickets } = req.body;
-  if (!name || !email) return res.status(400).json({ error: 'name and email required' });
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
   const count = Number(tickets) || 1;
-  if (event.registered + count > event.capacity) return res.status(400).json({ error: 'Not enough capacity' });
-  const reg = { id: uuid(), eventId: event.id, eventTitle: event.title, name, email, phone: phone || '', tickets: count, registeredAt: new Date().toISOString() };
-  db.data.registrations.push(reg);
-  event.registered += count;
-  await db.write();
+  if ((event.registered || 0) + count > event.capacity) {
+    return res.status(400).json({ error: 'Not enough ticket capacity available' });
+  }
+  const reg = {
+    id: uuid(),
+    eventId: event.id,
+    eventTitle: event.title,
+    name,
+    email,
+    phone: phone || '',
+    tickets: count,
+    registeredAt: new Date().toISOString()
+  };
+  if (!Array.isArray(data.registrations)) data.registrations = [];
+  data.registrations.push(reg);
+  event.registered = (event.registered || 0) + count;
+  await safeWrite();
   res.status(201).json(reg);
 });
 
 app.get('/api/registrations', async (req, res) => {
-  await db.read();
-  res.json(db.data.registrations);
+  const data = await safeRead();
+  res.json(data.registrations || []);
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Eventra API → http://localhost:${PORT}`));
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Eventra API → http://localhost:${PORT}`));
+}
 
 export default app;

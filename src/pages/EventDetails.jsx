@@ -39,10 +39,10 @@ export default function EventDetails() {
       await registerForEvent(id, { ...form, tickets });
       setRegistered(true);
       setModal(false);
-      setEvent(ev => ({ ...ev, registered: ev.registered + tickets }));
+      setEvent(ev => ({ ...ev, registered: (Number(ev?.registered) || 0) + tickets }));
       toast.success('Registration successful! 🎉');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Registration failed');
+      toast.error(err.response?.data?.error || err.message || 'Registration failed');
     }
     setSubmitting(false);
   };

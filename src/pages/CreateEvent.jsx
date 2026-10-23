@@ -47,35 +47,35 @@ const PreviewCard = memo(({ form }) => (
   </div>
 ));
 
-/* ── Stable text / textarea inputs ── */
-const TextField = memo(({ label, error, value, onChange, placeholder, type = 'text', ...rest }) => (
+/* ── Controlled responsive text / textarea inputs ── */
+const TextField = ({ label, error, value, onChange, placeholder, type = 'text', ...rest }) => (
   <div>
     {label && <label className="text-sm font-medium block mb-1">{label}</label>}
     <input
       type={type}
-      defaultValue={value}
-      onBlur={e => onChange(e.target.value)}
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow"
       {...rest}
     />
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
-));
+);
 
-const TextArea = memo(({ label, error, value, onChange, placeholder, rows = 4 }) => (
+const TextArea = ({ label, error, value, onChange, placeholder, rows = 4 }) => (
   <div>
     {label && <label className="text-sm font-medium block mb-1">{label}</label>}
     <textarea
-      defaultValue={value}
-      onBlur={e => onChange(e.target.value)}
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
       rows={rows}
       placeholder={placeholder}
       className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow resize-none"
     />
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
-));
+);
 
 export default function CreateEvent() {
   const { id } = useParams();
@@ -120,9 +120,17 @@ export default function CreateEvent() {
   const prev = () => setStep(s => s - 1);
 
   const handleSubmit = async () => {
+    if (!form.title?.trim() || !form.category || !form.date) {
+      toast.error('Please complete title, category and date');
+      return;
+    }
     setSaving(true);
     try {
-      const payload = { ...form, price: Number(form.price), capacity: Number(form.capacity) };
+      const payload = {
+        ...form,
+        price: Number(form.price) || 0,
+        capacity: Number(form.capacity) || 100
+      };
       if (isEdit) {
         await updateEvent(id, payload);
         toast.success('Event updated!');
@@ -130,10 +138,14 @@ export default function CreateEvent() {
       } else {
         const e = await createEvent(payload);
         toast.success('Event created! 🎉');
-        navigate(`/events/${e.id}`);
+        if (e && e.id) {
+          navigate(`/events/${e.id}`);
+        } else {
+          navigate('/events');
+        }
       }
-    } catch {
-      toast.error('Something went wrong');
+    } catch (err) {
+      toast.error(err.response?.data?.error || err.message || 'Something went wrong');
     }
     setSaving(false);
   };
