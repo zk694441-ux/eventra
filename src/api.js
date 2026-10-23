@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const baseURL = rawBaseURL.replace(/\/+$/, '');
+
+const api = axios.create({ baseURL });
 
 export const getEvents = (params) => api.get('/events', { params }).then(r => r.data);
 export const getEvent = (id) => api.get(`/events/${id}`).then(r => r.data);

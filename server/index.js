@@ -5,16 +5,31 @@ import { JSONFile } from 'lowdb/node';
 import { v4 as uuid } from 'uuid';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import fs from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-const adapter = new JSONFile(join(__dirname, 'db.json'));
-const defaultData = { events: [], registrations: [] };
-const db = new Low(adapter, defaultData);
-await db.read();
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+if (process.env.CLIENT_URL) {
+  process.env.CLIENT_URL.split(',').forEach(url => {
+    const trimmed = url.trim().replace(/\/+$/, '');
+    if (trimmed) allowedOrigins.push(trimmed);
+  });
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/+$/, '');
+    if (allowedOrigins.includes(cleanOrigin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true
+}));
+app.use(express.json());
 
 const SEED = [
   { id: uuid(), title: 'ReactConf 2026', category: 'Technology', date: '2026-11-15', time: '09:00', venue: 'Jio World Convention Centre', city: 'Mumbai', price: 2999, capacity: 500, registered: 342, image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800', description: 'The premier React conference with talks from the core team and leading practitioners.', schedule: [{ time: '09:00', title: 'Registration & Breakfast' }, { time: '10:00', title: 'Keynote: React 2026' }, { time: '11:30', title: 'Workshop: Server Components' }, { time: '14:00', title: 'Talk: Performance Patterns' }] },
@@ -31,10 +46,24 @@ const SEED = [
   { id: uuid(), title: 'Digital Marketing Summit', category: 'Business', date: '2026-12-09', time: '09:00', venue: 'Hyderabad International Convention Centre', city: 'Hyderabad', price: 1999, capacity: 400, registered: 267, image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800', description: 'Master SEO, social media, and growth hacking from India\'s top industry leaders.', schedule: [{ time: '09:00', title: 'Keynote' }, { time: '10:30', title: 'SEO Deep Dive' }, { time: '13:00', title: 'Lunch' }, { time: '14:00', title: 'Growth Hacking Panel' }] },
 ];
 
-if (!db.data.events.length) {
-  db.data.events = SEED;
+const dbPath = join(__dirname, 'db.json');
+if (!fs.existsSync(dbPath)) {
+  fs.writeFileSync(dbPath, JSON.stringify({ events: SEED, registrations: [] }, null, 2));
+}
+
+const adapter = new JSONFile(dbPath);
+const defaultData = { events: SEED, registrations: [] };
+const db = new Low(adapter, defaultData);
+await db.read();
+
+if (!db.data || !db.data.events || !db.data.events.length) {
+  db.data = { events: SEED, registrations: db.data?.registrations || [] };
   await db.write();
 }
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 app.get('/api/events', async (req, res) => {
   await db.read();
@@ -107,4 +136,5 @@ app.get('/api/registrations', async (req, res) => {
   res.json(db.data.registrations);
 });
 
-app.listen(4000, () => console.log('Eventra API → http://localhost:4000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Eventra API → http://localhost:${PORT}`));
