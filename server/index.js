@@ -138,3 +138,5 @@ app.get('/api/registrations', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Eventra API → http://localhost:${PORT}`));
+
+export default app;
